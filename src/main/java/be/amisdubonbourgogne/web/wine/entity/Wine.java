@@ -38,7 +38,7 @@ public class Wine {
     private String grapes;
     @Column(columnDefinition = "TEXT")
     private String description;
-    private boolean availaible = true;
+    private boolean available = true;
     private boolean featured = false;
     @Column(nullable = false,unique = true,length = 200)
     private String slug;
