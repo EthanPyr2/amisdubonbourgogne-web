@@ -4,7 +4,9 @@ import be.amisdubonbourgogne.web.wine.dto.WineAdminResponse;
 import be.amisdubonbourgogne.web.wine.dto.WinePublicResponse;
 import be.amisdubonbourgogne.web.wine.dto.WineRequest;
 import be.amisdubonbourgogne.web.wine.entity.Wine;
+import be.amisdubonbourgogne.web.wine.exception.WineNotFoundException;
 import be.amisdubonbourgogne.web.wine.repository.WineRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,7 @@ public class WineService {
 
     //-------ADMIN-----//
     //C
+    @Transactional
     public WineAdminResponse save(WineRequest request) {
         Wine wine = new Wine();
         applyRequest(wine, request);
@@ -38,9 +41,7 @@ public class WineService {
     }
     //R
     public WineAdminResponse findByIdAdmin(Long id){
-        return repository.findById(id)
-                .map(this::toAdmin)
-                .orElseThrow(() -> new RuntimeException("Vin introuvable"));
+        return toAdmin(findWine(id));
 
 
     }
@@ -50,13 +51,23 @@ public class WineService {
                 .toList();
     }
     //U
+    @Transactional
+    public WineAdminResponse update(Long id, WineRequest request){
+        Wine wine = findWine(id);
+        applyRequest(wine, request);
+        return toAdmin(wine);
+
+    }
+    @Transactional
+    public void setAvailability(Long id, boolean available) {
+        findWine(id).setAvailable(available);
+    }
     //D
+    @Transactional
     public void delete(Long id){
-        repository.deleteById(id);
+        repository.delete(findWine(id));
     }
-    public void isNotAvailable(Wine wine){
-        wine.setAvailable(false);
-    }
+
     //-------Intern------//
     private WinePublicResponse toPublic(Wine wine) {
         return new WinePublicResponse(
@@ -125,6 +136,10 @@ public class WineService {
             slug = base + "-" + counter++;
         }
         return slug;
+    }
+    private Wine findWine(Long id){
+        return repository.findById(id)
+                .orElseThrow(() -> new WineNotFoundException("Vin introuvable (id " + id + ")"));
     }
 
 }
