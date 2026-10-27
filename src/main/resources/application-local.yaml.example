@@ -1,0 +1,5 @@
+# Copier en application-local.yaml et renseigner les identifiants
+spring:
+  datasource:
+    username: changeme
+    password: changeme
