@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import org.springframework.data.annotation.Id;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -30,7 +27,7 @@ public class Wine {
     @Column(nullable = false, length = 20)
     private WineColor color;
     private Integer vintage;
-    @Column(nullable = false)
+    @Column
     private BigDecimal volumeCl;
     @Column(nullable = false, precision = 8, scale = 2)
     private BigDecimal price;

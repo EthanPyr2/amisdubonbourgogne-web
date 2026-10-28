@@ -23,6 +23,6 @@ public record WineAdminResponse(
         boolean available,
         boolean featured,
         Instant createdAt,
-        Instant updatedAt
+        Instant updateAt
 ) {
 }

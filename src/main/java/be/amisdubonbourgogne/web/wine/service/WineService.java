@@ -36,6 +36,7 @@ public class WineService {
     }
     public List<WinePublicResponse> findFeatured() {
         return repository.findAll().stream()
+                .filter(Wine::isAvailable)
                 .filter(Wine::isFeatured)
                 .sorted(ORDRE_CARTE)
                 .map(this::toPublic)
