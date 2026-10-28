@@ -34,6 +34,20 @@ public class WineService {
                 .map(this::toPublic)
                 .toList();
     }
+    public List<WinePublicResponse> findFeatured() {
+        return repository.findAll().stream()
+                .filter(Wine::isFeatured)
+                .sorted(ORDRE_CARTE)
+                .map(this::toPublic)
+                .toList();
+    }
+    public WinePublicResponse findBySlug(String slug){
+       return repository.findBySlug(slug)
+               .filter(Wine::isAvailable)
+               .map(this::toPublic)
+               .orElseThrow(() -> new WineNotFoundException("Vin introuvable (slug " + slug + ")"));
+
+    }
 
     //-------ADMIN-----//
     //C
