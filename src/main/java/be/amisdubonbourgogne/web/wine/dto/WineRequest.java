@@ -14,4 +14,6 @@ public record WineRequest(    @NotBlank @Size(max = 150) String producer,
                               @Min(1900) @Max(2100) Integer vintage,
                               @NotNull @Positive BigDecimal price,
                               String grapes,
-                              String description) {}
+                              String description,
+                              String cuvee
+) {}

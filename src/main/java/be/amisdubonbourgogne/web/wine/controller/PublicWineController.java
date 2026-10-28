@@ -22,5 +22,4 @@ public class PublicWineController {
         return service.findAvailable();
     }
 
-
 }

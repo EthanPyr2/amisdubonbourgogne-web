@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.text.Normalizer;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,10 +22,15 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class WineService {
     private final WineRepository repository;
+    private static final Comparator<Wine> ORDRE_CARTE =
+            Comparator.comparing((Wine w) -> w.getRegion().ordinal())
+                    .thenComparing(w -> w.getColor().ordinal())
+                    .thenComparing(Wine::getAppellation);
     //-)----PUBLIC----//
     public List<WinePublicResponse> findAvailable() {
         return repository.findAll().stream()
                 .filter(Wine::isAvailable)
+                .sorted(ORDRE_CARTE)
                 .map(this::toPublic)
                 .toList();
     }
@@ -32,7 +38,7 @@ public class WineService {
     //-------ADMIN-----//
     //C
     @Transactional
-    public WineAdminResponse save(WineRequest request) {
+    public WineAdminResponse create(WineRequest request) {
         Wine wine = new Wine();
         applyRequest(wine, request);
         wine.setSlug(generateUniqueSlug(wine));
@@ -47,6 +53,7 @@ public class WineService {
     }
     public List<WineAdminResponse> findAllAdmin(){
         return repository.findAll().stream()
+                .sorted(ORDRE_CARTE)
                 .map(this::toAdmin)
                 .toList();
     }
@@ -114,6 +121,7 @@ public class WineService {
         wine.setPrice(request.price());
         wine.setGrapes(request.grapes());
         wine.setDescription(request.description());
+        wine.setCuvee(request.cuvee());
 
     }
     private String toSlug(String text) {
