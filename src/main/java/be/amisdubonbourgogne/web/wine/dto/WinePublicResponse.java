@@ -1,6 +1,6 @@
 package be.amisdubonbourgogne.web.wine.dto;
 
-import be.amisdubonbourgogne.web.wine.entity.Region;
+import be.amisdubonbourgogne.web.region.dto.RegionResponse;
 import be.amisdubonbourgogne.web.wine.entity.WineColor;
 
 
@@ -11,7 +11,7 @@ public record WinePublicResponse(
         String producer,
         String appellation,
         String cuvee,
-        Region region,
+        RegionResponse region,
         WineColor color,
         Integer vintage,
         BigDecimal price,

@@ -1,5 +1,6 @@
 package be.amisdubonbourgogne.web.wine.service;
 
+import be.amisdubonbourgogne.web.region.service.RegionService;
 import be.amisdubonbourgogne.web.wine.dto.WineAdminResponse;
 import be.amisdubonbourgogne.web.wine.dto.WinePublicResponse;
 import be.amisdubonbourgogne.web.wine.dto.WineRequest;
@@ -22,8 +23,10 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class WineService {
     private final WineRepository repository;
+    private final RegionService regionService;
     private static final Comparator<Wine> ORDRE_CARTE =
-            Comparator.comparing((Wine w) -> w.getRegion().ordinal())
+            Comparator.comparing((Wine w) -> w.getRegion().getDisplayOrder())
+                    .thenComparing(w -> w.getRegion().getName())
                     .thenComparing(w -> w.getColor().ordinal())
                     .thenComparing(Wine::getAppellation);
     //-)----PUBLIC----//
@@ -97,7 +100,7 @@ public class WineService {
                 wine.getProducer(),
                 wine.getAppellation(),
                 wine.getCuvee(),
-                wine.getRegion(),
+                RegionService.toPublic(wine.getRegion()),
                 wine.getColor(),
                 wine.getVintage(),
                 wine.getPrice(),
@@ -112,7 +115,7 @@ public class WineService {
                 wine.getProducer(),
                 wine.getAppellation(),
                 wine.getCuvee(),
-                wine.getRegion(),
+                RegionService.toPublic(wine.getRegion()),
                 wine.getColor(),
                 wine.getVintage(),
                 wine.getVolumeCl(),
@@ -130,7 +133,7 @@ public class WineService {
     private void applyRequest(Wine wine, WineRequest request){
         wine.setProducer(request.producer());
         wine.setAppellation(request.appellation());
-        wine.setRegion(request.region());
+        wine.setRegion(regionService.getReference(request.regionId()));
         wine.setColor(request.color());
         wine.setVintage(request.vintage());
         wine.setPrice(request.price());

@@ -1,5 +1,6 @@
 package be.amisdubonbourgogne.web.wine.entity;
 
+import be.amisdubonbourgogne.web.region.entity.Region;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,8 +21,8 @@ public class Wine {
     private String appellation;
     @Column(length = 150)
     private String cuvee;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id", nullable = false)
     private Region region;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
