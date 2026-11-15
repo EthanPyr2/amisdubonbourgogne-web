@@ -4,7 +4,10 @@ spring:
 
   config:
     import: optional:classpath:application-local.yaml
-
+  security:
+    user:
+      name: ${NAME:}
+      password: ${PASSWORD:}
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/amis_bourgogne}
     username: ${DB_USERNAME:}
