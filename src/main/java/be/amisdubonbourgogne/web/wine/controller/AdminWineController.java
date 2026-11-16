@@ -37,6 +37,11 @@ public class AdminWineController {
     public void setAvailability(@PathVariable Long id, @RequestParam boolean available){
         service.setAvailability(id, available);
     }
+    @PatchMapping("/{id}/featured")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setFeatured(@PathVariable Long id, @RequestParam boolean featured){
+        service.setFeatured(id, featured);
+    }
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id){

@@ -95,6 +95,10 @@ public class WineService {
     public void setAvailability(Long id, boolean available) {
         findWine(id).setAvailable(available);
     }
+    @Transactional
+    public void setFeatured(Long id, boolean featured) {
+        findWine(id).setFeatured(featured);
+    }
     //D
     @Transactional
     public void delete(Long id){
