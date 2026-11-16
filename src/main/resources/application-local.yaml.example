@@ -3,3 +3,12 @@ spring:
   datasource:
     username: changeme
     password: changeme
+
+# Comptes de l'admin (un ou plusieurs). Mot de passe chiffré avec : ./scripts/hash-password.sh
+# Si cette liste est absente, le compte spring.security.user (name / password) est utilisé.
+app:
+  admins:
+    - username: gerard
+      password: "{bcrypt}$2a$10$remplacer-par-le-resultat-du-script"
+    - username: ethan
+      password: "{bcrypt}$2a$10$remplacer-par-le-resultat-du-script"
