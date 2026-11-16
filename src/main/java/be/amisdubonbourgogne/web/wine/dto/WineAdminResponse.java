@@ -4,7 +4,7 @@ import be.amisdubonbourgogne.web.region.dto.RegionResponse;
 import be.amisdubonbourgogne.web.wine.entity.WineColor;
 
 
-import java.math.BigDecimal;
+import java.util.List;
 import java.time.Instant;
 
 public record WineAdminResponse(
@@ -16,8 +16,7 @@ public record WineAdminResponse(
         RegionResponse region,
         WineColor color,
         Integer vintage,
-        BigDecimal volumeCl,
-        BigDecimal price,
+        List<WineFormatResponse> formats,
         String grapes,
         String description,
         boolean available,

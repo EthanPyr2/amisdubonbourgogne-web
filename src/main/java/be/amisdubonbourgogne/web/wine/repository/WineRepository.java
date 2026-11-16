@@ -16,13 +16,13 @@ public interface WineRepository extends JpaRepository<Wine,Long>{
     boolean existsByRegionId(Long regionId);
 
     @Override
-    @EntityGraph(attributePaths = "region")
+    @EntityGraph(attributePaths = {"region", "formats"})
     List<Wine> findAll();
 
     @Override
-    @EntityGraph(attributePaths = "region")
+    @EntityGraph(attributePaths = {"region", "formats"})
     Optional<Wine> findById(Long id);
 
-    @EntityGraph(attributePaths = "region")
+    @EntityGraph(attributePaths = {"region", "formats"})
     Optional<Wine> findBySlug(String slug);
 }

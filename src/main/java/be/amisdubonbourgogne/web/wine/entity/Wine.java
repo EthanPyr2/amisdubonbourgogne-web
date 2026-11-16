@@ -3,10 +3,13 @@ package be.amisdubonbourgogne.web.wine.entity;
 import be.amisdubonbourgogne.web.region.entity.Region;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -28,10 +31,12 @@ public class Wine {
     @Column(nullable = false, length = 20)
     private WineColor color;
     private Integer vintage;
-    @Column
-    private BigDecimal volumeCl;
-    @Column(nullable = false, precision = 8, scale = 2)
-    private BigDecimal price;
+    // Formats de bouteille (volume + prix), du plus petit au plus grand
+    @OneToMany(mappedBy = "wine", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("volumeCl ASC")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<WineFormat> formats = new ArrayList<>();
     @Column(length = 150)
     private String grapes;
     @Column(columnDefinition = "TEXT")

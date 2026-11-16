@@ -3,19 +3,27 @@ package be.amisdubonbourgogne.web.wine.service;
 import be.amisdubonbourgogne.web.region.service.RegionService;
 import be.amisdubonbourgogne.web.wine.dto.WineAdminResponse;
 import be.amisdubonbourgogne.web.wine.dto.WinePublicResponse;
+import be.amisdubonbourgogne.web.wine.dto.WineFormatRequest;
+import be.amisdubonbourgogne.web.wine.dto.WineFormatResponse;
 import be.amisdubonbourgogne.web.wine.dto.WineRequest;
 import be.amisdubonbourgogne.web.wine.entity.Wine;
+import be.amisdubonbourgogne.web.wine.entity.WineFormat;
 import be.amisdubonbourgogne.web.wine.exception.WineNotFoundException;
 import be.amisdubonbourgogne.web.wine.repository.WineRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,7 +111,7 @@ public class WineService {
                 RegionService.toPublic(wine.getRegion()),
                 wine.getColor(),
                 wine.getVintage(),
-                wine.getPrice(),
+                toFormats(wine),
                 wine.getGrapes(),
                 wine.getDescription()
         );
@@ -118,8 +126,7 @@ public class WineService {
                 RegionService.toPublic(wine.getRegion()),
                 wine.getColor(),
                 wine.getVintage(),
-                wine.getVolumeCl(),
-                wine.getPrice(),
+                toFormats(wine),
                 wine.getGrapes(),
                 wine.getDescription(),
                 wine.isAvailable(),
@@ -133,14 +140,51 @@ public class WineService {
     private void applyRequest(Wine wine, WineRequest request){
         wine.setProducer(request.producer());
         wine.setAppellation(request.appellation());
-        wine.setRegion(regionService.getReference(request.regionId()));
+        wine.setRegion(regionService.getByName(request.region()));
         wine.setColor(request.color());
         wine.setVintage(request.vintage());
-        wine.setPrice(request.price());
         wine.setGrapes(request.grapes());
         wine.setDescription(request.description());
         wine.setCuvee(request.cuvee());
+        applyFormats(wine, request.formats());
+    }
 
+    /**
+     * Aligne les formats du vin sur ceux de la requête, en se basant sur le volume :
+     * même volume → on met le prix à jour ; nouveau volume → on l'ajoute ; volume absent → on le supprime.
+     * (Mettre à jour plutôt que tout supprimer/recréer évite de heurter la contrainte unique (wine_id, volume_cl).)
+     */
+    private void applyFormats(Wine wine, List<WineFormatRequest> requested) {
+        // TreeMap compare les BigDecimal par valeur : 75 et 75.0 sont le même volume
+        Map<BigDecimal, BigDecimal> priceByVolume = new TreeMap<>();
+        for (WineFormatRequest format : requested) {
+            if (priceByVolume.put(format.volumeCl(), format.price()) != null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Le format " + format.volumeCl().stripTrailingZeros().toPlainString() + " cl est présent deux fois");
+            }
+        }
+
+        wine.getFormats().removeIf(existing -> !priceByVolume.containsKey(existing.getVolumeCl()));
+
+        priceByVolume.forEach((volume, price) -> wine.getFormats().stream()
+                .filter(existing -> existing.getVolumeCl().compareTo(volume) == 0)
+                .findFirst()
+                .ifPresentOrElse(
+                        existing -> existing.setPrice(price),
+                        () -> {
+                            WineFormat format = new WineFormat();
+                            format.setWine(wine);
+                            format.setVolumeCl(volume);
+                            format.setPrice(price);
+                            wine.getFormats().add(format);
+                        }));
+    }
+
+    private List<WineFormatResponse> toFormats(Wine wine) {
+        return wine.getFormats().stream()
+                .sorted(Comparator.comparing(WineFormat::getVolumeCl))
+                .map(format -> new WineFormatResponse(format.getVolumeCl(), format.getPrice()))
+                .toList();
     }
     private String toSlug(String text) {
         return Normalizer.normalize(text, Normalizer.Form.NFD)

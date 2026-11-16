@@ -4,7 +4,7 @@ import be.amisdubonbourgogne.web.region.dto.RegionResponse;
 import be.amisdubonbourgogne.web.wine.entity.WineColor;
 
 
-import java.math.BigDecimal;
+import java.util.List;
 
 public record WinePublicResponse(
         String slug,
@@ -14,7 +14,7 @@ public record WinePublicResponse(
         RegionResponse region,
         WineColor color,
         Integer vintage,
-        BigDecimal price,
+        List<WineFormatResponse> formats,
         String grapes,
         String description
 ) {
