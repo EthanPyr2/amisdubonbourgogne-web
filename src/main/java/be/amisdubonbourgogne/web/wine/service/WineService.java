@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,9 @@ public class WineService {
                     .thenComparing(w -> w.getRegion().getName())
                     .thenComparing(w -> w.getColor().ordinal())
                     .thenComparing(Wine::getAppellation);
+    private static final Comparator<Wine> PLUS_RECENTS_EN_VEDETTE =
+            Comparator.comparing(Wine::getFeaturedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(ORDRE_CARTE);
     //-)----PUBLIC----//
     public List<WinePublicResponse> findAvailable() {
         return repository.findAll().stream()
@@ -49,7 +53,8 @@ public class WineService {
         return repository.findAll().stream()
                 .filter(Wine::isAvailable)
                 .filter(Wine::isFeatured)
-                .sorted(ORDRE_CARTE)
+                // Les plus récemment mis en vedette d'abord (la landing en affiche 3)
+                .sorted(PLUS_RECENTS_EN_VEDETTE)
                 .map(this::toPublic)
                 .toList();
     }
@@ -97,7 +102,13 @@ public class WineService {
     }
     @Transactional
     public void setFeatured(Long id, boolean featured) {
-        findWine(id).setFeatured(featured);
+        Wine wine = findWine(id);
+        if (featured && !wine.isFeatured()) {
+            wine.setFeaturedAt(Instant.now()); // garde la date d'origine si le vin était déjà en vedette
+        } else if (!featured) {
+            wine.setFeaturedAt(null);
+        }
+        wine.setFeatured(featured);
     }
     //D
     @Transactional

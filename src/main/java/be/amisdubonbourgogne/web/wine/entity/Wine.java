@@ -43,6 +43,8 @@ public class Wine {
     private String description;
     private boolean available = true;
     private boolean featured = false;
+    // Moment où le vin a été mis en vedette (null s'il ne l'est pas)
+    private Instant featuredAt;
     @Column(nullable = false,unique = true,length = 200)
     private String slug;
     @CreationTimestamp private Instant createdAt;
