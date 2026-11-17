@@ -12,11 +12,6 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Limite les essais de connexion : au-delà de {@code maxFailures} échecs en {@code window}
- * depuis la même adresse IP, les tentatives sont refusées jusqu'à la fin de la fenêtre.
- * En mémoire : remis à zéro au redémarrage, suffisant pour un seul serveur.
- */
 @Service
 public class LoginAttemptService {
     private final int maxFailures;
@@ -24,7 +19,7 @@ public class LoginAttemptService {
     private final Clock clock;
     private final Map<String, Deque<Instant>> failures = new ConcurrentHashMap<>();
 
-    @Autowired // deux constructeurs : celui-ci est celui de Spring, l'autre sert aux tests
+    @Autowired
     public LoginAttemptService(@Value("${app.login.max-failures:5}") int maxFailures,
                                @Value("${app.login.window-minutes:15}") long windowMinutes) {
         this(maxFailures, Duration.ofMinutes(windowMinutes), Clock.systemUTC());
@@ -36,7 +31,6 @@ public class LoginAttemptService {
         this.clock = clock;
     }
 
-    /** Temps d'attente restant si cette adresse est bloquée, sinon Duration.ZERO. */
     public Duration remainingBlock(String ip) {
         Deque<Instant> attempts = failures.get(ip);
         if (attempts == null) {

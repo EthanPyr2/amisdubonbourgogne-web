@@ -1,18 +1,10 @@
-# Profil de production : activer avec SPRING_PROFILES_ACTIVE=prod
-# Tous les secrets viennent de variables d'environnement, jamais de ce fichier :
-#   DB_URL, DB_USERNAME, DB_PASSWORD
-#   APP_ADMINS_0_USERNAME, APP_ADMINS_0_PASSWORD ({bcrypt}…), APP_ADMINS_1_USERNAME, …
-#   (ou ADMIN_USERNAME / ADMIN_PASSWORD pour un seul compte)
 server:
-  # Derrière nginx : utiliser l'adresse IP réelle du visiteur (X-Forwarded-For) et le schéma https
   forward-headers-strategy: native
   servlet:
     session:
       cookie:
-        # Le cookie de session ne circule qu'en HTTPS
         secure: true
 
 app:
   cors:
-    # Front et back servis à la même adresse : aucune autre origine autorisée
     allowed-origins:

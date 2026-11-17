@@ -74,10 +74,6 @@ public class RegionService {
         repository.delete(region);
     }
 
-    /**
-     * Utilisé par WineService : retrouve une région à partir de son nom.
-     * Insensible aux accents et aux majuscules (« vallee du rhone nord » trouve « Vallée du Rhône Nord »).
-     */
     public Region getByName(String name) {
         return repository.findBySlug(toSlug(name))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,

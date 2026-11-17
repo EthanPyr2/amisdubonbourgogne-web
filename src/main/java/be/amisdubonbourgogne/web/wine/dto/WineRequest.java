@@ -14,6 +14,5 @@ public record WineRequest(    @NotBlank @Size(max = 150) String producer,
                               String grapes,
                               String description,
                               String cuvee,
-                              // Au moins un format ; @Valid vérifie aussi chaque format de la liste
                               @NotEmpty List<@Valid @NotNull WineFormatRequest> formats
 ) {}

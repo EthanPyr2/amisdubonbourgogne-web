@@ -31,7 +31,6 @@ public class Wine {
     @Column(nullable = false, length = 20)
     private WineColor color;
     private Integer vintage;
-    // Formats de bouteille (volume + prix), du plus petit au plus grand
     @OneToMany(mappedBy = "wine", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("volumeCl ASC")
     @ToString.Exclude
@@ -43,7 +42,6 @@ public class Wine {
     private String description;
     private boolean available = true;
     private boolean featured = false;
-    // Moment où le vin a été mis en vedette (null s'il ne l'est pas)
     private Instant featuredAt;
     @Column(nullable = false,unique = true,length = 200)
     private String slug;

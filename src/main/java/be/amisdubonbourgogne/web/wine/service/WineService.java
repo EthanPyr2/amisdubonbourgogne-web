@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.Instant;
@@ -53,7 +52,6 @@ public class WineService {
         return repository.findAll().stream()
                 .filter(Wine::isAvailable)
                 .filter(Wine::isFeatured)
-                // Les plus récemment mis en vedette d'abord (la landing en affiche 3)
                 .sorted(PLUS_RECENTS_EN_VEDETTE)
                 .map(this::toPublic)
                 .toList();
@@ -80,7 +78,6 @@ public class WineService {
     public WineAdminResponse findByIdAdmin(Long id){
         return toAdmin(findWine(id));
 
-
     }
     public List<WineAdminResponse> findAllAdmin(){
         return repository.findAll().stream()
@@ -104,7 +101,7 @@ public class WineService {
     public void setFeatured(Long id, boolean featured) {
         Wine wine = findWine(id);
         if (featured && !wine.isFeatured()) {
-            wine.setFeaturedAt(Instant.now()); // garde la date d'origine si le vin était déjà en vedette
+            wine.setFeaturedAt(Instant.now());
         } else if (!featured) {
             wine.setFeaturedAt(null);
         }
@@ -164,13 +161,7 @@ public class WineService {
         applyFormats(wine, request.formats());
     }
 
-    /**
-     * Aligne les formats du vin sur ceux de la requête, en se basant sur le volume :
-     * même volume → on met le prix à jour ; nouveau volume → on l'ajoute ; volume absent → on le supprime.
-     * (Mettre à jour plutôt que tout supprimer/recréer évite de heurter la contrainte unique (wine_id, volume_cl).)
-     */
     private void applyFormats(Wine wine, List<WineFormatRequest> requested) {
-        // TreeMap compare les BigDecimal par valeur : 75 et 75.0 sont le même volume
         Map<BigDecimal, BigDecimal> priceByVolume = new TreeMap<>();
         for (WineFormatRequest format : requested) {
             if (priceByVolume.put(format.volumeCl(), format.price()) != null) {

@@ -32,34 +32,21 @@ import java.util.Set;
 @EnableWebSecurity
 @EnableConfigurationProperties(AdminAccountsProperties.class)
 public class SecurityConfig {
-
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception {
         http
-                // Applique les règles de CorsConfig AVANT les contrôles de sécurité
                 .cors(Customizer.withDefaults())
-                // Session par cookie : il faut une protection CSRF. Mode « SPA » : le jeton est publié dans
-                // le cookie XSRF-TOKEN, qu'Angular renvoie automatiquement dans l'en-tête X-XSRF-TOKEN.
                 .csrf(csrf -> csrf.spa())
-                // L'utilisateur connecté est gardé dans la session HTTP (cookie JSESSIONID, HttpOnly)
                 .securityContext(context -> context.securityContextRepository(securityContextRepository))
                 .authorizeHttpRequests(auth -> auth
-                        // Vérifications CORS (preflight) envoyées par le navigateur
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Page d'erreur de Spring Boot : sans ça, une erreur 400/404 devient un 403
                         .requestMatchers("/error").permitAll()
-                        // Site public : lecture seule
                         .requestMatchers(HttpMethod.GET, "/api/wines/**", "/api/regions/**").permitAll()
-                        // Connexion : ouvert à tous (la route /me répond 401 si personne n'est connecté)
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Gestion de la carte : connexion obligatoire
                         .requestMatchers("/api/admin/**").authenticated()
-                        // Tout le reste est refusé
                         .anyRequest().denyAll()
                 )
-                // Non connecté : simple 401 (sans en-tête WWW-Authenticate, donc sans fenêtre de login du navigateur)
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                // POST /api/auth/logout : vide la session et répond 204
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT)));
@@ -72,12 +59,6 @@ public class SecurityConfig {
         return new HttpSessionSecurityContextRepository();
     }
 
-    /**
-     * Comptes admin : la liste app.admins (plusieurs comptes) ou, à défaut, le compte unique
-     * spring.security.user.name / password. Tous ont les mêmes droits.
-     * Mot de passe en clair (local) ou chiffré « {bcrypt}$2a$10$… » (recommandé en production).
-     * L'application refuse de démarrer si aucun compte valable n'est configuré.
-     */
     @Bean
     UserDetailsService adminAccounts(AdminAccountsProperties properties,
                                      @Value("${spring.security.user.name:}") String fallbackName,

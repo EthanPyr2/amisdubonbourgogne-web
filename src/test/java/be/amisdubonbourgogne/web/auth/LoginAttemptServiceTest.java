@@ -11,8 +11,6 @@ import java.time.ZoneOffset;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LoginAttemptServiceTest {
-
-    /** Horloge qu'on fait avancer à la main */
     static class TestClock extends Clock {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
         @Override public ZoneId getZone() { return ZoneOffset.UTC; }

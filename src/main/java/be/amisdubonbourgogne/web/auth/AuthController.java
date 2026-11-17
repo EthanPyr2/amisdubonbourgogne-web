@@ -21,7 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 
-/** Connexion à l'admin. La déconnexion (POST /api/auth/logout) est gérée par Spring Security. */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -30,10 +29,6 @@ public class AuthController {
     private final SecurityContextRepository securityContextRepository;
     private final LoginAttemptService loginAttempts;
 
-    /**
-     * Qui est connecté ? 200 { username } ou 401.
-     * Lire le jeton CSRF force aussi l'envoi du cookie XSRF-TOKEN, nécessaire avant tout POST (dont le login).
-     */
     @GetMapping("/me")
     public AuthResponse me(Authentication authentication, CsrfToken csrfToken) {
         csrfToken.getToken();
@@ -45,7 +40,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request, HttpServletResponse response) {
-        // Trop d'échecs récents depuis cette adresse : refus immédiat, sans vérifier le mot de passe
         String ip = request.getRemoteAddr();
         Duration blocked = loginAttempts.remainingBlock(ip);
         if (!blocked.isZero() && !blocked.isNegative()) {
@@ -60,11 +54,9 @@ public class AuthController {
                     UsernamePasswordAuthenticationToken.unauthenticated(login.username(), login.password()));
         } catch (AuthenticationException e) {
             loginAttempts.recordFailure(ip);
-            // Même message que l'identifiant ou le mot de passe soit faux : ne rien révéler
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiant ou mot de passe incorrect");
         }
         loginAttempts.recordSuccess(ip);
-        // Nouvel identifiant de session à la connexion (protection contre la fixation de session)
         request.getSession(true);
         request.changeSessionId();
 

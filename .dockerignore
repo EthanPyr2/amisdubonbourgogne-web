@@ -1,7 +1,5 @@
-# Jamais dans l'image : secrets locaux
 src/main/resources/application-local.yaml
 .env
-# Inutile pour construire
 target
 .idea
 *.iml
